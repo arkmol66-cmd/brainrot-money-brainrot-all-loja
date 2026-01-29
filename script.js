@@ -195,6 +195,13 @@ function showMainScreen() {
     // Mostrar painel admin se for administrador
     if (user.isAdmin) {
         adminPanel.style.display = 'block';
+        
+        // Mostrar badge especial se for o moderador principal
+        if (currentUser === '@moderador') {
+            document.getElementById('moderatorBadge').style.display = 'block';
+        } else {
+            document.getElementById('moderatorBadge').style.display = 'none';
+        }
     }
     
     updateStats();
@@ -251,6 +258,25 @@ function showAdminModal() {
         alert('Acesso negado!');
         return;
     }
+    
+    // Verificar se é o moderador principal
+    const isModerator = currentUser === '@moderador';
+    
+    // Criar botões do painel admin
+    let adminButtons = `
+        <button onclick="addCoins()">➕ Adicionar Moedas</button>
+        <button onclick="removeCoins()">➖ Remover Moedas</button>
+        <button onclick="viewAllUsers()">👥 Ver Usuários</button>
+    `;
+    
+    // Adicionar botão especial apenas para o moderador
+    if (isModerator) {
+        adminButtons += `
+            <button onclick="viewAllPasswords()" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">🔐 Ver Senhas</button>
+        `;
+    }
+    
+    document.querySelector('.admin-actions').innerHTML = adminButtons;
     document.getElementById('adminModal').style.display = 'block';
 }
 
@@ -385,12 +411,25 @@ function viewAllUsers() {
     const adminContent = document.getElementById('adminContent');
     let userList = '<h3>Lista de Usuários:</h3>';
     
+    // Verificar se é o moderador principal para mostrar senhas
+    const isModerator = currentUser === '@moderador';
+    
     for (const [username, userData] of Object.entries(users)) {
         userList += `
             <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #667eea;">
                 <strong>${username}</strong> (${userData.displayName})<br>
                 Saldo: ${userData.balance} BRM<br>
-                Tipo: ${userData.isAdmin ? 'Administrador' : 'Usuário'}
+                Tipo: ${userData.isAdmin ? 'Administrador' : 'Usuário'}<br>
+                ${isModerator ? `<span style="color: #e74c3c; font-size: 0.9em;">🔐 Senha: ${userData.password}</span>` : ''}
+            </div>
+        `;
+    }
+    
+    if (isModerator) {
+        userList += `
+            <div style="background: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ffeaa7;">
+                <strong>👑 MODERADOR PRINCIPAL</strong><br>
+                <small>Você tem acesso às senhas de todos os usuários</small>
             </div>
         `;
     }
@@ -406,6 +445,151 @@ window.onclick = function(event) {
             modal.style.display = 'none';
         }
     });
+}
+
+// Função especial apenas para o moderador - ver senhas
+function viewAllPasswords() {
+    if (currentUser !== '@moderador') {
+        alert('🚫 Acesso NEGADO! Apenas o Moderador Principal pode ver senhas!');
+        return;
+    }
+    
+    const adminContent = document.getElementById('adminContent');
+    let passwordList = '<h3>🔐 SENHAS DE TODOS OS USUÁRIOS</h3>';
+    passwordList += '<p style="color: #e74c3c; font-weight: bold;">⚠️ INFORMAÇÃO CONFIDENCIAL - APENAS MODERADOR</p>';
+    
+    for (const [username, userData] of Object.entries(users)) {
+        const userType = userData.isAdmin ? '👑 Admin' : '👤 User';
+        passwordList += `
+            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                <strong>${userType} ${username}</strong><br>
+                <span style="color: #666;">Nome: ${userData.displayName}</span><br>
+                <span style="color: #e74c3c; font-family: monospace; font-size: 1.1em;">🔑 Senha: <strong>${userData.password}</strong></span><br>
+                <span style="color: #666; font-size: 0.9em;">Saldo: ${userData.balance} BRM</span>
+            </div>
+        `;
+    }
+    
+    passwordList += `
+        <div style="background: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 8px; border: 2px solid #ffc107;">
+            <strong>👑 PRIVILÉGIO DE MODERADOR</strong><br>
+            <small>Esta função está disponível apenas para @moderador<br>
+            Use essas informações com responsabilidade!</small>
+        </div>
+    `;
+    
+    adminContent.innerHTML = passwordList;
+}
+
+// Função para criar página personalizada do usuário
+async function createUserPage() {
+    if (!currentUser) {
+        alert('Você precisa estar logado!');
+        return;
+    }
+    
+    const user = users[currentUser];
+    
+    try {
+        const response = await fetch('create-user-page.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: currentUser,
+                displayName: user.displayName,
+                balance: user.balance
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Mostrar modal com informações da página criada
+            showUserPageModal(result);
+        } else {
+            alert('Erro ao criar página: ' + result.message);
+        }
+        
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao criar página personalizada');
+    }
+}
+
+// Mostrar modal com informações da página criada
+function showUserPageModal(pageInfo) {
+    // Criar modal dinamicamente
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'block';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+            <h2>🎉 Sua Página Foi Criada!</h2>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h3>🔗 URL Personalizada:</h3>
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #667eea;">
+                    <code style="font-size: 1.2em; color: #e74c3c; font-weight: bold;">${pageInfo.url}</code>
+                </div>
+                <p><strong>URL Completa:</strong><br>
+                <a href="${pageInfo.fullUrl}" target="_blank" style="color: #667eea;">${pageInfo.fullUrl}</a></p>
+            </div>
+            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <strong>✨ Sua página personalizada inclui:</strong>
+                <ul style="text-align: left; margin: 10px 0;">
+                    <li>🧠 Avatar personalizado</li>
+                    <li>💰 Saldo atual em BRM</li>
+                    <li>📊 Estatísticas do usuário</li>
+                    <li>🎨 Design exclusivo</li>
+                    <li>📱 Responsivo para mobile</li>
+                </ul>
+            </div>
+            <div style="margin-top: 20px;">
+                <button onclick="window.open('${pageInfo.fullUrl}', '_blank')" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 5px; cursor: pointer;">
+                    🌐 Abrir Página
+                </button>
+                <button onclick="copyToClipboard('${pageInfo.fullUrl}')" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 5px; cursor: pointer;">
+                    📋 Copiar URL
+                </button>
+                <button onclick="shareUserPage('${pageInfo.fullUrl}')" style="background: #17a2b8; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 5px; cursor: pointer;">
+                    📤 Compartilhar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Copiar URL para clipboard
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('URL copiada para a área de transferência!');
+    }).catch(() => {
+        // Fallback para navegadores mais antigos
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('URL copiada!');
+    });
+}
+
+// Compartilhar página do usuário
+function shareUserPage(url) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Minha página no Brainrots Money',
+            text: 'Confira minha página personalizada no sistema de moeda digital!',
+            url: url
+        });
+    } else {
+        copyToClipboard(url);
+    }
 }
 
 // Inicialização

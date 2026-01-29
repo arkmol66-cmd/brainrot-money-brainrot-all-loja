@@ -87,8 +87,14 @@
                 <div class="actions">
                     <button class="action-btn" onclick="showTransferModal()">💸 Transferir</button>
                     <button class="action-btn" onclick="showHistoryModal()">📊 Histórico</button>
+                    <button class="action-btn" onclick="createUserPage()">🌐 Minha Página</button>
                     <div id="adminPanel" class="admin-panel" style="display: none;">
                         <button class="action-btn admin-btn" onclick="showAdminModal()">⚙️ Painel Admin</button>
+                        <div id="moderatorBadge" style="display: none; margin-top: 10px;">
+                            <span style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8em;">
+                                👑 MODERADOR PRINCIPAL
+                            </span>
+                        </div>
                     </div>
                 </div>
 
