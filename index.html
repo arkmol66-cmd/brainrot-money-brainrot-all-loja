@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brainrots Money - Moeda Digital</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Tela de Login -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-box">
+                <h1>🧠 Brainrots Money</h1>
+                <p>Sistema de Moeda Digital</p>
+                
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label for="username">Nome de Usuário:</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="password">Senha:</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    
+                    <button type="submit">Entrar</button>
+                    <button type="button" id="createAccountBtn" class="secondary-btn">Criar Conta</button>
+                </form>
+                
+                <div id="loginError" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Tela de Criação de Conta -->
+        <div id="createAccountScreen" class="screen">
+            <div class="login-box">
+                <h1>🧠 Criar Conta</h1>
+                <p>Brainrots Money - Nova Conta</p>
+                
+                <form id="createAccountForm">
+                    <div class="input-group">
+                        <label for="newUsername">Nome de Usuário:</label>
+                        <input type="text" id="newUsername" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="newPassword">Senha:</label>
+                        <input type="password" id="newPassword" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="confirmPassword">Confirmar Senha:</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+                    
+                    <button type="submit">Criar Conta</button>
+                    <button type="button" id="backToLoginBtn" class="secondary-btn">Voltar ao Login</button>
+                </form>
+                
+                <div id="createAccountError" class="error-message"></div>
+                <div id="createAccountSuccess" class="success-message"></div>
+            </div>
+        </div>
+
+        <!-- Tela Principal -->
+        <div id="mainScreen" class="screen">
+            <header>
+                <h1>🧠 Brainrots Money</h1>
+                <div class="user-info">
+                    <span id="welcomeUser"></span>
+                    <button id="logoutBtn">Sair</button>
+                </div>
+            </header>
+
+            <main>
+                <div class="balance-card">
+                    <h2>Seu Saldo</h2>
+                    <div class="balance">
+                        <span id="coinBalance">500</span>
+                        <span class="currency">BRM</span>
+                    </div>
+                    <p>Brainrots Money</p>
+                </div>
+
+                <div class="actions">
+                    <button class="action-btn" onclick="showTransferModal()">💸 Transferir</button>
+                    <button class="action-btn" onclick="showHistoryModal()">📊 Histórico</button>
+                    <div id="adminPanel" class="admin-panel" style="display: none;">
+                        <button class="action-btn admin-btn" onclick="showAdminModal()">⚙️ Painel Admin</button>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <h3>Total de Usuários</h3>
+                        <span id="totalUsers">3</span>
+                    </div>
+                    <div class="stat-item">
+                        <h3>Moedas em Circulação</h3>
+                        <span id="totalCoins">1500</span>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal de Transferência -->
+    <div id="transferModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('transferModal')">&times;</span>
+            <h2>Transferir BRM</h2>
+            <form id="transferForm">
+                <div class="input-group">
+                    <label for="recipient">Para:</label>
+                    <input type="text" id="recipient" required>
+                </div>
+                <div class="input-group">
+                    <label for="amount">Quantidade:</label>
+                    <input type="number" id="amount" min="1" required>
+                </div>
+                <button type="submit">Transferir</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Histórico -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('historyModal')">&times;</span>
+            <h2>Histórico de Transações</h2>
+            <div id="transactionHistory">
+                <p>Nenhuma transação ainda.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Admin -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('adminModal')">&times;</span>
+            <h2>Painel Administrativo</h2>
+            <div class="admin-actions">
+                <button onclick="addCoins()">➕ Adicionar Moedas</button>
+                <button onclick="removeCoins()">➖ Remover Moedas</button>
+                <button onclick="viewAllUsers()">👥 Ver Usuários</button>
+            </div>
+            <div id="adminContent"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
